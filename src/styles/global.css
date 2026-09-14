@@ -1,0 +1,386 @@
+/* src/styles/global.css */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #18181b;
+  border-bottom: 1px solid #27272a;
+  padding: 0.8rem 1rem;
+  position: relative;
+}
+
+.nav-content {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  position: absolute;
+  left: 0;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: #ffffff;
+}
+
+.navbar nav {
+  display: flex;
+  gap: 1.2rem;
+  font-size: 0.9rem;
+}
+
+.navbar a {
+  color: #a1a1aa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.navbar a:hover, .navbar a.active {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.container {
+  max-width: 440px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.logo-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: conic-gradient(#facc15 0deg 90deg, #3b82f6 90deg 180deg, #ef4444 180deg 270deg, #22c55e 270deg 360deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-arrow {
+  background-color: #121212;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  font-size: 0.95rem;
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.calculator-card {
+  background-color: #1c1c21;
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.rate-selector-wrapper {
+  position: relative;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.rate-btn {
+  background-color: #22c55e;
+  color: #000000;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.rate-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  margin-top: 5px;
+  width: 200px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.rate-dropdown.hidden {
+  display: none;
+}
+
+.rate-dropdown button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  padding: 0.7rem;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.rate-dropdown button:hover {
+  background-color: #3f3f46;
+  color: #ffffff;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background-color: #121215;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid #27272a;
+  width: 100%;
+}
+
+.input-group label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #a1a1aa;
+  flex-shrink: 0;
+  width: 35px;
+}
+
+.input-group input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.2rem;
+  width: 100%;
+  text-align: right;
+  outline: none;
+  min-width: 0;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 6px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  opacity: 1;
+}
+
+.card-footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.info-box {
+  background-color: #121215;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: #a1a1aa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.variation-box {
+  justify-content: center;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.brecha-card {
+  background-color: #1c1c21;
+  border-radius: 12px;
+  padding: 0.9rem;
+  text-align: center;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  color: #e0e0e0;
+  width: 100%;
+}
+
+.brecha-card strong {
+  color: #ffffff;
+}
+
+/* ==========================================
+   ESTILOS PARA LA VISTA DE TASAS (tasas.astro)
+   ========================================== */
+
+.tabs-container {
+  display: flex;
+  background-color: #1c1c21;
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  padding: 0.6rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background-color: #22c55e;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.date-header {
+  background-color: #1c1c21;
+  border-radius: 12px;
+  padding: 0.8rem;
+  text-align: center;
+  color: #a1a1aa;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.rate-row {
+  background-color: #1c1c21;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border: 1px solid #27272a;
+}
+
+.rate-name {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.rate-values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.rate-price {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.rate-change {
+  font-size: 0.85rem;
+  color: #22c55e;
+}
+
+.rate-change.neutral {
+  color: #22c55e;
+}
+
+.rate-time {
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+  .navbar nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #18181b;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #27272a;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+    z-index: 100;
+  }
+  .navbar nav.show {
+    display: flex;
+  }
+}

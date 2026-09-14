@@ -1,11 +1,184 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Ad from '../components/Ad.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <main class="container">
+    <!-- Logo centrado -->
+    <div class="logo-wrapper">
+      <div class="logo-circle">
+        <span class="logo-arrow">↕</span>
+      </div>
+      <span class="logo-text">Dolar Hoy</span>
+    </div>
+
+    <div class="calculator-card">
+      <!-- Selector de Tasa -->
+      <div class="rate-selector-wrapper">
+        <button id="rate-btn" class="rate-btn">
+          <span id="current-rate-name">Cargando tasa...</span>
+          <span class="dropdown-icon">⋮</span>
+        </button>
+        
+        <div id="rate-dropdown" class="rate-dropdown hidden">
+          <button data-type="bcv_usd">Dólar BCV</button>
+          <button data-type="bcv_eur">Euro BCV</button>
+          <button data-type="usdt_avg">Binance P2P (USDT)</button>
+        </div>
+      </div>
+
+      <!-- Input de Moneda Extranjera -->
+      <div class="input-group">
+        <label id="symbol-ext" for="input-ext">$</label>
+        <input type="number" id="input-ext" value="1.00" step="any" />
+        <button class="copy-btn" id="copy-ext" title="Copiar valor">📋</button>
+      </div>
+
+      <!-- Input de Bolívares -->
+      <div class="input-group">
+        <label for="input-bs">Bs</label>
+        <input type="number" id="input-bs" value="0.00" step="any" />
+        <button class="copy-btn" id="copy-bs" title="Copiar valor">📋</button>
+      </div>
+
+      <!-- Indicador de Fecha y Hora -->
+      <div class="card-footer-info">
+        <div class="info-box variation-box">
+          <span id="rate-date-label" class="variation neutral">Actualizado: ---</span>
+        </div>
+      </div>
+    </div>
+    
+    <Ad />
+
+    <!-- Tarjeta de Brecha Cambiaria -->
+    <div class="brecha-card">
+      <span>Brecha: <strong id="brecha-value">--%</strong> ↑</span>
+    </div>
+  </main>
+
+  <script>
+    let currentActiveRecord = null;
+    let activeRateType = 'bcv_usd';
+
+    const rateBtn = document.getElementById('rate-btn');
+    const rateDropdown = document.getElementById('rate-dropdown');
+    const currentRateName = document.getElementById('current-rate-name');
+    const inputExt = document.getElementById('input-ext') as HTMLInputElement;
+    const inputBs = document.getElementById('input-bs') as HTMLInputElement;
+    const symbolExt = document.getElementById('symbol-ext');
+    const rateDateLabel = document.getElementById('rate-date-label');
+    const brechaValue = document.getElementById('brecha-value');
+
+    const rateConfig = {
+      bcv_usd: { name: 'Dólar BCV', symbol: '$' },
+      bcv_eur: { name: 'Euro BCV', symbol: '€' },
+      usdt_avg: { name: 'Binance P2P (USDT)', symbol: '$' }
+    };
+
+    // Función para obtener la fecha y opcionalmente la hora actual
+    function getDateTime(includeTime = false) {
+      const now = new Date();
+      const dateOptions: Intl.DateTimeFormatOptions = { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      };
+      
+      const fecha = now.toLocaleDateString('es-VE', dateOptions);
+
+      if (includeTime) {
+        const timeOptions: Intl.DateTimeFormatOptions = { 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit',
+          hour12: true 
+        };
+        const hora = now.toLocaleTimeString('es-VE', timeOptions);
+        return `${fecha} - ${hora}`;
+      }
+
+      return fecha;
+    }
+
+    async function initLatest() {
+      try {
+        const resPrices = await fetch('https://www.brecha-cambiaria.com/api/prices');
+        const dataPrices = await resPrices.json();
+        
+        currentActiveRecord = dataPrices;
+        applyRateData(currentActiveRecord);
+      } catch (e) {
+        console.error("Error al conectar con la API", e);
+        if (currentRateName) currentRateName.innerText = "Error de conexión";
+      }
+    }
+
+    function applyRateData(record) {
+      if (!record) return;
+
+      if (currentRateName) currentRateName.innerText = rateConfig[activeRateType].name;
+      if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
+
+      const currentRate = record[activeRateType] || 0;
+      const extVal = parseFloat(inputExt.value) || 0;
+      inputBs.value = (extVal * currentRate).toFixed(2);
+
+      if (activeRateType === 'bcv_eur') {
+        const bEur = record.brecha_usdt_eur !== undefined ? record.brecha_usdt_eur : 0;
+        brechaValue.innerText = `${Number(bEur).toFixed(2)}%`;
+      } else if (activeRateType === 'usdt_avg') {
+        brechaValue.innerText = `0.00%`;
+      } else {
+        const bUsd = record.brecha_usdt_usd !== undefined ? record.brecha_usdt_usd : 0;
+        brechaValue.innerText = `${Number(bUsd).toFixed(2)}%`;
+      }
+
+      // Si es USDT muestra fecha y hora, si es BCV muestra solo la fecha
+      const showTime = (activeRateType === 'usdt_avg');
+      const timestamp = getDateTime(showTime);
+      rateDateLabel.innerText = `Actualizado: ${timestamp}`;
+    }
+
+    inputExt.addEventListener('input', () => {
+      if (!currentActiveRecord) return;
+      const currentRate = currentActiveRecord[activeRateType] || 0;
+      const val = parseFloat(inputExt.value) || 0;
+      inputBs.value = (val * currentRate).toFixed(2);
+    });
+
+    inputBs.addEventListener('input', () => {
+      if (!currentActiveRecord) return;
+      const currentRate = currentActiveRecord[activeRateType] || 1;
+      const val = parseFloat(inputBs.value) || 0;
+      inputExt.value = (val / currentRate).toFixed(2);
+    });
+
+    rateBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rateDropdown.classList.toggle('hidden');
+    });
+
+    window.addEventListener('click', () => {
+      rateDropdown.classList.add('hidden');
+    });
+
+    rateDropdown.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        activeRateType = (e.target as HTMLElement).getAttribute('data-type');
+        applyRateData(currentActiveRecord);
+      });
+    });
+
+    document.getElementById('copy-ext').addEventListener('click', () => {
+      navigator.clipboard.writeText(inputExt.value);
+    });
+
+    document.getElementById('copy-bs').addEventListener('click', () => {
+      navigator.clipboard.writeText(inputBs.value);
+    });
+
+    initLatest();
+  </script>
 </Layout>

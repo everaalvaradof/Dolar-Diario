@@ -1,0 +1,206 @@
+---
+// Tu componente con las modificaciones solicitadas
+---
+
+<div class="w-full max-w-xl mx-auto px-4 mt-8">
+  <div class="flex flex-col border py-6 gap-0 bg-slate-900 border-slate-800 rounded-2xl shadow-2xl">
+    
+    <!-- Selector de Monedas (Orden: BCV, Euro, USDT) -->
+    <div class="px-6 grid gap-2">
+      <div class="flex gap-2 justify-center items-center">
+        <div class="inline-flex bg-slate-950 p-1.5 rounded-full border border-slate-800">
+          <button type="button" data-rate="bcv" class="rate-btn px-4 py-1.5 rounded-full font-bold text-sm md:text-base cursor-pointer transition-all bg-amber-500 text-slate-950 shadow-md">
+            Dólar BCV
+          </button>
+          <button type="button" data-rate="euro" class="rate-btn px-4 py-1.5 rounded-full font-bold text-sm md:text-base cursor-pointer transition-all text-slate-400 hover:text-white">
+            Euro
+          </button>
+          <button type="button" data-rate="usdt" class="rate-btn px-4 py-1.5 rounded-full font-bold text-sm md:text-base cursor-pointer transition-all text-slate-400 hover:text-white">
+            USDT
+          </button>
+        </div>
+      </div>
+      <p id="status-tasas" class="text-center text-xs text-slate-400 mt-1">Cargando tasas en vivo...</p>
+    </div>
+
+    <!-- Contenido Inputs -->
+    <div class="px-6 mt-6 space-y-6">
+      
+      <!-- Input Divisa Superior -->
+      <div class="relative flex text-white items-center">
+        <div id="simbolo-divisa" class="absolute inset-y-0 left-0 flex items-center pl-1 text-slate-300 font-bold text-lg">
+          $
+        </div>
+        <input 
+          id="input-divisa" 
+          type="text" 
+          value="1,00" 
+          inputmode="decimal" 
+          class="h-12 w-full bg-transparent pl-8 pr-10 text-right font-medium text-lg md:text-xl border-b-2 border-slate-700 focus:border-amber-500 outline-none transition-colors" 
+        />
+        <button type="button" id="copy-divisa" aria-label="Copiar" class="absolute bottom-3 right-0 text-slate-400 hover:text-amber-500 transition-colors cursor-pointer">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="24" width="24"><path fill="none" d="M0 0h24v24H0z"></path><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+        </button>
+      </div>
+
+      <!-- Input Bolívares (VES) Inferior -->
+      <div class="relative flex text-white items-center">
+        <div class="absolute left-0 bottom-3">
+          <svg class="h-5" width="27" height="19" viewBox="0 0 27 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.86102e-06 17.7734V0H6.77491C8.68734 0 10.1685 0.386556 11.2183 1.15967C12.2681 1.92464 12.793 3.08838 12.793 4.65088C12.793 5.63558 12.5692 6.44938 12.1216 7.09229C11.674 7.72705 11.1165 8.16243 10.4492 8.39844V8.44727C11.2793 8.68327 11.9629 9.15527 12.5 9.86328C13.0453 10.5713 13.3179 11.5153 13.3179 12.6953C13.3179 14.2985 12.7523 15.5477 11.6211 16.4429C10.4899 17.3299 8.98438 17.7734 7.1045 17.7734H2.86102e-06ZM3.8208 15.0757H6.7627C7.67416 15.0757 8.34554 14.8397 8.77686 14.3677C9.20817 13.8957 9.42383 13.2568 9.42383 12.4512C9.42383 11.6455 9.20817 11.0067 8.77686 10.5347C8.34554 10.0627 7.67416 9.82666 6.7627 9.82666H3.8208V15.0757ZM3.8208 7.38525H6.44532C7.34864 7.38525 7.99968 7.1818 8.39844 6.7749C8.7972 6.35986 8.99658 5.78206 8.99658 5.0415C8.99658 4.30094 8.7972 3.73535 8.39844 3.34473C7.99968 2.94596 7.34864 2.74658 6.44532 2.74658H3.8208V7.38525ZM15.0902 13.8184L18.6791 13.8428V14.0503C18.6791 14.6281 18.8744 15.0472 19.265 15.3076C19.6557 15.568 20.1846 15.6982 20.852 15.6982C21.5111 15.6982 22.0076 15.5802 22.3412 15.3442C22.683 15.1001 22.8539 14.7705 22.8539 14.3555C22.8539 13.9404 22.6667 13.6312 22.2924 13.4277C21.918 13.2161 21.0798 12.9801 19.7777 12.7197C18.2641 12.4186 17.1614 11.9507 16.4696 11.3159C15.786 10.6812 15.4442 9.85107 15.4442 8.82568C15.4442 7.61312 15.9325 6.66504 16.9091 5.98145C17.8856 5.29785 19.2121 4.95605 20.8886 4.95605C22.5569 4.95605 23.8834 5.31413 24.8681 6.03027C25.8528 6.73828 26.3451 7.71484 26.3451 8.95996V9.13086H22.7685V8.92334C22.7685 8.43506 22.6098 8.06478 22.2924 7.8125C21.975 7.55208 21.4949 7.42188 20.852 7.42188C20.2335 7.42188 19.7818 7.5236 19.497 7.72705C19.2203 7.9305 19.0819 8.21126 19.0819 8.56934C19.0819 8.92741 19.2691 9.21224 19.6435 9.42383C20.0178 9.62728 20.8682 9.85921 22.1947 10.1196C23.7165 10.4207 24.8274 10.8765 25.5272 11.4868C26.2353 12.089 26.5893 12.9272 26.5893 14.0015C26.5893 15.3117 26.101 16.3249 25.1244 17.041C24.156 17.7572 22.744 18.1152 20.8886 18.1152C19.0412 18.1152 17.613 17.7572 16.6039 17.041C15.6029 16.3249 15.0984 15.3035 15.0902 13.9771V13.8184Z" fill="white"></path>
+          </svg>
+        </div>
+        <input 
+          id="input-ves" 
+          type="text" 
+          value="0,00" 
+          inputmode="decimal" 
+          class="h-12 w-full bg-transparent pl-10 pr-10 text-right font-medium text-lg md:text-xl border-b-2 border-slate-700 focus:border-amber-500 outline-none transition-colors" 
+        />
+        <button type="button" id="copy-ves" aria-label="Copiar" class="absolute bottom-3 right-0 text-slate-400 hover:text-amber-500 transition-colors cursor-pointer">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="24" width="24"><path fill="none" d="M0 0h24v24H0z"></path><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Footer con Fecha y Hora de Actualización -->
+    <div class="flex items-center px-6 mt-6 pt-4 border-t border-slate-800 flex-col-reverse md:flex-row">
+      <div class="w-full flex-1 bg-slate-800/60 flex gap-2 justify-center md:justify-around py-2 rounded-lg items-center px-2">
+        <p class="text-lg text-amber-400 font-medium" id="reloj-hora">--:--</p>
+        <p class="text-lg font-light text-slate-300" id="reloj-fecha">--/--/----</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let tasas = { bcv: 0, usdt: 0, euro: 0 };
+  // Puedes agregar aquí la hora específica en que la API actualizó cada tasa (ej: formato HH:MM)
+  let horasActualizacion = { bcv: '', euro: '', usdt: '11:00 PM' }; 
+  let tasaActual = 0;
+  let monedaSeleccionada = 'bcv';
+
+  const rateButtons = document.querySelectorAll('.rate-btn');
+  const inputDivisa = document.getElementById('input-divisa') as HTMLInputElement;
+  const inputVes = document.getElementById('input-ves') as HTMLInputElement;
+  const statusTasas = document.getElementById('status-tasas');
+  const relojHora = document.getElementById('reloj-hora');
+  const relojFecha = document.getElementById('reloj-fecha');
+  const simboloDivisa = document.getElementById('simbolo-divisa');
+
+  const simbolosMoneda: Record<string, string> = {
+    bcv: '$',
+    euro: '€',
+    usdt: '₮'
+  };
+
+  function formatearNumero(valor: number) {
+    return valor.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function parsearNumero(str: string) {
+    if (!str) return 0;
+    let limpio = str.replace(/\./g, '').replace(',', '.');
+    return parseFloat(limpio) || 0;
+  }
+
+  function actualizarCalculo() {
+    let valorDivisa = parsearNumero(inputDivisa.value);
+    let resultadoVes = valorDivisa * tasaActual;
+    inputVes.value = formatearNumero(resultadoVes);
+  }
+
+  function actualizarVistaMoneda() {
+    // Actualizar símbolo de la moneda activa
+    if (simboloDivisa) {
+      simboloDivisa.textContent = simbolosMoneda[monedaSeleccionada] || '$';
+    }
+
+    // Gestionar visualización de hora según la divisa
+    if (monedaSeleccionada === 'usdt') {
+      if (relojHora) {
+        relojHora.style.display = 'block';
+        // Muestra la hora registrada de la última actualización del USDT
+        relojHora.textContent = horasActualizacion.usdt || '12:00 AM'; 
+      }
+    } else {
+      // Para BCV y Euro ocultamos la hora, mostrando únicamente la fecha
+      if (relojHora) {
+        relojHora.style.display = 'none';
+      }
+    }
+  }
+
+  async function inicializarTasas() {
+    try {
+      if (statusTasas) statusTasas.textContent = "Obteniendo precios reales en vivo...";
+      
+      const res = await fetch('/api/tasas.json');
+      if (res.ok) {
+        tasas = await res.json();
+        
+        // Seleccionar tasa por defecto (BCV)
+        tasaActual = tasas.bcv;
+        monedaSeleccionada = 'bcv';
+        actualizarCalculo();
+        actualizarVistaMoneda();
+
+        if (statusTasas) {
+          statusTasas.textContent = "Tasas sincronizadas en vivo";
+          statusTasas.classList.remove('text-slate-400');
+          statusTasas.classList.add('text-emerald-400');
+        }
+      }
+    } catch (e) {
+      console.error("Error cargando tasas:", e);
+      if (statusTasas) {
+        statusTasas.textContent = "Error al sincronizar tasas";
+        statusTasas.classList.add('text-red-400');
+      }
+    }
+  }
+
+  rateButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLElement;
+      rateButtons.forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-slate-950', 'shadow-md');
+        b.classList.add('text-slate-400', 'hover:text-white');
+      });
+      target.classList.remove('text-slate-400', 'hover:text-white');
+      target.classList.add('bg-amber-500', 'text-slate-950', 'shadow-md');
+
+      const tipo = target.getAttribute('data-rate');
+      if (tipo && tasas[tipo as keyof typeof tasas] !== undefined) {
+        tasaActual = tasas[tipo as keyof typeof tasas];
+        monedaSeleccionada = tipo;
+        actualizarCalculo();
+        actualizarVistaMoneda();
+      }
+    });
+  });
+
+  inputDivisa.addEventListener('input', () => {
+    actualizarCalculo();
+  });
+
+  inputVes.addEventListener('input', () => {
+    let valorVes = parsearNumero(inputVes.value);
+    if (tasaActual > 0) {
+      let resultadoDivisa = valorVes / tasaActual;
+      inputDivisa.value = formatearNumero(resultadoDivisa);
+    }
+  });
+
+  // Fecha estática o basada en la última consulta de la tasa
+  function mostrarFechaActualizacion() {
+    const ahora = new Date();
+    if (relojFecha) relojFecha.textContent = ahora.toLocaleDateString('es-VE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  mostrarFechaActualizacion();
+  actualizarVistaMoneda();
+  inicializarTasas();
+</script>

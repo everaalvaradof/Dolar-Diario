@@ -1,0 +1,95 @@
+---
+// src/components/PrecioUsdt.astro
+---
+
+<div class="card-tasa">
+  <h3>Tasas y Brecha Cambiaria</h3>
+  <div id="tasas-container">
+    <p class="loading">Cargando tasas...</p>
+  </div>
+</div>
+
+<script>
+  async function cargarPrecios() {
+    const container = document.getElementById('tasas-container');
+    
+    try {
+      const response = await fetch('https://www.brecha-cambiaria.com/api/prices');
+      const data = await response.json();
+      
+      container.innerHTML = `
+        <div class="precios">
+          <div class="seccion">
+            <p class="item">Binance USDT: <strong>Bs. ${data.usdt_avg.toFixed(2)}</strong></p>
+            <p class="item">Dólar BCV: <strong>Bs. ${data.bcv_usd.toFixed(2)}</strong></p>
+            <p class="brecha">Brecha USDT/USD: <span>${data.brecha_usdt_usd > 0 ? '+' : ''}${data.brecha_usdt_usd.toFixed(2)}%</span></p>
+          </div>
+          
+          <div class="seccion divisor">
+            <p class="item">Euro BCV: <strong>Bs. ${data.bcv_eur.toFixed(2)}</strong></p>
+            <p class="brecha">Brecha USDT/EUR: <span>${data.brecha_usdt_eur > 0 ? '+' : ''}${data.brecha_usdt_eur.toFixed(2)}%</span></p>
+          </div>
+
+          <span class="update">Actualizado: ${new Date(data.timestamp).toLocaleTimeString()}</span>
+        </div>
+      `;
+    } catch (error) {
+      container.innerHTML = `<p class="error">No se pudieron cargar las tasas.</p>`;
+      console.error("Error al obtener la API:", error);
+    }
+  }
+
+  cargarPrecios();
+</script>
+
+<style>
+  .card-tasa {
+    background: #1e1e2f;
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    max-width: 340px;
+    font-family: system-ui, sans-serif;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .card-tasa h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #a0aec0;
+    border-bottom: 1px solid #2d3748;
+    padding-bottom: 0.5rem;
+    text-align: center;
+  }
+  .precios p {
+    margin: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+  }
+  .seccion {
+    margin-bottom: 0.8rem;
+  }
+  .divisor {
+    border-top: 1px dashed #2d3748;
+    padding-top: 0.8rem;
+  }
+  .item strong {
+    color: #48bb78;
+  }
+  .brecha span {
+    color: #ed8936;
+    font-weight: bold;
+  }
+  .update {
+    display: block;
+    font-size: 0.75rem;
+    color: #718096;
+    margin-top: 0.8rem;
+    text-align: right;
+  }
+  .loading, .error {
+    color: #a0aec0;
+    font-style: italic;
+    text-align: center;
+  }
+</style>

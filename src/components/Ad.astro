@@ -1,0 +1,53 @@
+---
+// src/components/Ad.astro
+---
+
+<!-- Este script carga solo en PC -->
+<div class="ad-pc">
+    <script is:inline>
+        window.atOptions = {
+            'key' : 'fd83b45b1ce9547947075075a1e7bc02',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+        };
+    </script>
+    <script is:inline src="https://www.highperformanceformat.com/fd83b45b1ce9547947075075a1e7bc02/invoke.js"></script>
+</div>
+
+<!-- Este script carga solo en Móvil -->
+<div class="ad-mobile">
+    <script is:inline>
+        window.atOptions = {
+            'key' : 'c574b8347643e181c473a78852e8c755',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+        };
+    </script>
+    <script is:inline src="https://www.highperformanceformat.com/c574b8347643e181c473a78852e8c755/invoke.js"></script>
+</div>
+
+<style>
+    /* Estilo básico para centrar */
+    .ad-pc, .ad-mobile { 
+        display: flex; 
+        justify-content: center; 
+        margin: 20px 0; 
+        min-height: 90px; /* Evita que el layout salte */
+    }
+
+    /* Lógica: Esconder/Mostrar según el tamaño */
+    @media (max-width: 768px) {
+        .ad-pc { display: none !important; }
+        .ad-mobile { display: flex !important; }
+    }
+
+    @media (min-width: 769px) {
+        .ad-pc { display: flex !important; }
+        .ad-mobile { display: none !important; }
+    }
+</style>
+
