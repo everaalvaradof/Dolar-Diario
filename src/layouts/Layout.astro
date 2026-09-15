@@ -6,7 +6,7 @@ interface Props {
   title?: string;
 }
 
-const { title = "Al Cambio - Calculadora de Tasas Venezuela" } = Astro.props;
+const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
 ---
 
 <html lang="es">
@@ -21,6 +21,20 @@ const { title = "Al Cambio - Calculadora de Tasas Venezuela" } = Astro.props;
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
     <title>{title}</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5X29EW7GG"></script>
+    <script>
+      // @ts-ignore
+      window.dataLayer = window.dataLayer || [];
+      // @ts-ignore
+      function gtag(){dataLayer.push(arguments);}
+      // @ts-ignore
+      gtag('js', new Date());
+
+      // @ts-ignore
+      gtag('config', 'G-D5X29EW7GG');
+    </script>
   </head>
   <body>
     <header class="navbar">
@@ -33,9 +47,7 @@ const { title = "Al Cambio - Calculadora de Tasas Venezuela" } = Astro.props;
         <nav id="nav-menu">
           <a href="/" class="active">Calculadora</a>
           <a href="/tasas">Tasas</a>
-          <a href="/conoce-la-app">Conoce la App</a>
-          <a href="/blog">Blog</a>
-          <a href="/politicas">Políticas y Privacidad</a>
+          
         </nav>
       </div>
     </header>
