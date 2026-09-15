@@ -14,7 +14,6 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- Configuración para PWA / App Móvil -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#121212" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -22,7 +21,6 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
     
     <title>{title}</title>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5X29EW7GG"></script>
     <script>
       // @ts-ignore
@@ -31,7 +29,6 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
       function gtag(){dataLayer.push(arguments);}
       // @ts-ignore
       gtag('js', new Date());
-
       // @ts-ignore
       gtag('config', 'G-D5X29EW7GG');
     </script>
@@ -39,15 +36,38 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
   <body>
     <header class="navbar">
       <div class="nav-content">
-        <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
-          <span></span>
-          <span></span>
-          <span></span>
+        <!-- Izquierda: Menú Hamburguesa y Enlaces -->
+        <div class="nav-left">
+          <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          
+          <nav id="nav-menu">
+            <a href="/" class="active">Calculadora</a>
+            <a href="/tasas">Tasas</a>
+          </nav>
+        </div>
+
+        <!-- Centro: Logo exactamente igual al del index pero posicionado en la navbar -->
+        <a href="/" class="logo-wrapper nav-brand-center">
+          <div class="logo-circle">
+            <span class="logo-arrow">↕</span>
+          </div>
+          <span class="logo-text">Dolar Hoy</span>
+        </a>
+
+        <!-- Derecha: Botón de Compartir -->
+        <button id="share-btn" class="share-btn" aria-label="Compartir aplicación" title="Compartir Dolar Diario">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
         </button>
-        <nav id="nav-menu">
-          <a href="/" class="active">Calculadora</a>
-          <a href="/tasas">Tasas</a>
-        </nav>
       </div>
     </header>
 
@@ -62,24 +82,7 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
       </p>
     </footer>
 
-    <style>
-      .site-footer {
-        text-align: center;
-        padding: 1.5rem 1rem;
-        font-size: 0.85rem;
-        opacity: 0.8;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        margin-top: 2rem;
-      }
-      .site-footer a {
-        color: inherit;
-        text-decoration: underline;
-        font-weight: 500;
-      }
-    </style>
-
     <script>
-      // Lógica del menú desplegable
       const menuToggle = document.getElementById('menu-toggle');
       const navMenu = document.getElementById('nav-menu');
 
@@ -89,12 +92,40 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
           navMenu.classList.toggle('show');
         });
 
-        window.addEventListener('click', () => {
-          navMenu.classList.remove('show');
+        window.addEventListener('click', (e) => {
+          if (!navMenu.contains(e.target as Node) && !menuToggle.contains(e.target as Node)) {
+            navMenu.classList.remove('show');
+          }
         });
       }
 
-      // Registro del Service Worker para PWA
+      const shareBtn = document.getElementById('share-btn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+          const shareData = {
+            title: 'Dolar Diario',
+            text: 'Calcula y convierte al instante las tasas del Dólar BCV y Binance P2P en Venezuela.',
+            url: window.location.href,
+          };
+
+          if (navigator.share) {
+            try {
+              await navigator.share(shareData);
+              return;
+            } catch (err: any) {
+              if (err.name === 'AbortError') return;
+            }
+          }
+
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            alert('¡Enlace copiado al portapapeles!');
+          } catch (err) {
+            console.error('Error al copiar enlace:', err);
+          }
+        });
+      }
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
@@ -102,27 +133,25 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
         });
       }
     </script>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // Verificamos si ya le notificamos a Telegram en esta sesión del usuario
-    if (!sessionStorage.getItem('visit_notified')) {
-      const token = '8951220952:AAEZ6VmRmPw6hPcbRrh8WjNu4BDqI_Kar5o';
-      const chat_id = '540332548';
-      const mensaje = '¡Alguien entró a Dolar Diario! 🚀';
-      
-      const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chat_id}&text=${encodeURIComponent(mensaje)}`;
-      
-      fetch(url)
-        .then(response => {
-          if (response.ok) {
-            // Marcamos que ya se envió la notificación para esta sesión
-            sessionStorage.setItem('visit_notified', 'true');
-            console.log('Notificación de visita enviada');
-          }
-        })
-        .catch(error => console.error('Error al notificar:', error));
-    }
-  });
-</script>
+
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        if (!sessionStorage.getItem('visit_notified')) {
+          const token = '8951220952:AAEZ6VmRmPw6hPcbRrh8WjNu4BDqI_Kar5o';
+          const chat_id = '540332548';
+          const mensaje = '¡Alguien entró a Dolar Diario! 🚀';
+          
+          const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chat_id}&text=${encodeURIComponent(mensaje)}`;
+          
+          fetch(url)
+            .then(response => {
+              if (response.ok) {
+                sessionStorage.setItem('visit_notified', 'true');
+              }
+            })
+            .catch(error => console.error('Error al notificar:', error));
+        }
+      });
+    </script>
   </body>
 </html>

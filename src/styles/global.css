@@ -12,38 +12,33 @@ body {
   padding: 0;
 }
 
+/* ==========================================
+   NAVEGACIÓN Y CABECERA
+   ========================================== */
+
 .navbar {
-  background-color: #18181b;
-  border-bottom: 1px solid #27272a;
-  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
 }
 
 .nav-content {
-  max-width: 440px;
-  margin: 0 auto;
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  min-height: 70px;
 }
 
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  flex-direction: column;
-  gap: 5px;
-  position: absolute;
-  left: 0;
-}
-
-.menu-toggle span {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background-color: #ffffff;
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .navbar nav {
@@ -58,10 +53,49 @@ body {
   transition: color 0.2s;
 }
 
-.navbar a:hover, .navbar a.active {
+.navbar a:hover, 
+.navbar a.active {
   color: #ffffff;
   font-weight: 500;
 }
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0.5rem;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: #ffffff;
+}
+
+.share-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.share-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL Y LOGO
+   ========================================== */
 
 .container {
   max-width: 440px;
@@ -108,11 +142,15 @@ body {
   letter-spacing: -0.5px;
 }
 
+/* ==========================================
+   TARJETA DE CALCULADORA
+   ========================================== */
+
 .calculator-card {
   background-color: #1c1c21;
   border-radius: 16px;
   padding: 1.2rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   margin-bottom: 1rem;
   width: 100%;
 }
@@ -150,7 +188,7 @@ body {
   margin-top: 5px;
   width: 200px;
   z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -256,7 +294,7 @@ input[type=number]::-webkit-outer-spin-button {
   padding: 0.9rem;
   text-align: center;
   font-size: 0.95rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   color: #e0e0e0;
   width: 100%;
 }
@@ -266,7 +304,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 /* ==========================================
-   ESTILOS PARA LA VISTA DE TASAS (tasas.astro)
+   VISTA DE TASAS (tasas.astro)
    ========================================== */
 
 .tabs-container {
@@ -275,7 +313,7 @@ input[type=number]::-webkit-outer-spin-button {
   border-radius: 50px;
   padding: 4px;
   margin-bottom: 1.2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .tab-btn {
@@ -305,7 +343,7 @@ input[type=number]::-webkit-outer-spin-button {
   color: #a1a1aa;
   margin-bottom: 1.2rem;
   font-size: 0.95rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .rates-list {
@@ -322,7 +360,7 @@ input[type=number]::-webkit-outer-spin-button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border: 1px solid #27272a;
 }
 
@@ -344,12 +382,9 @@ input[type=number]::-webkit-outer-spin-button {
   font-size: 1.1rem;
 }
 
-.rate-change {
-  font-size: 0.85rem;
-  color: #22c55e;
-}
-
+.rate-change, 
 .rate-change.neutral {
+  font-size: 0.85rem;
   color: #22c55e;
 }
 
@@ -358,14 +393,74 @@ input[type=number]::-webkit-outer-spin-button {
   color: #a1a1aa;
 }
 
+/* ==========================================
+   BOTÓN DE COMPARTIR WHATSAPP
+   ========================================== */
+
+.whatsapp-share-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.whatsapp-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.whatsapp-share-btn:hover {
+  background-color: #22bf5b;
+  transform: translateY(-1px);
+}
+
+.whatsapp-share-btn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================
+   PIE DE PÁGINA Y UTILIDADES
+   ========================================== */
+
+.site-footer {
+  text-align: center;
+  padding: 1.5rem 1.1rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+}
+
+.site-footer a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
 .hidden {
   display: none !important;
 }
+
+/* ==========================================
+   MEDIA QUERIES (RESPONSIVE MÓVIL)
+   ========================================== */
 
 @media (max-width: 768px) {
   .menu-toggle {
     display: flex;
   }
+  
   .navbar nav {
     display: none;
     position: absolute;
@@ -377,10 +472,12 @@ input[type=number]::-webkit-outer-spin-button {
     align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid #27272a;
-    box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
     z-index: 100;
   }
+
+  /* Aquí se activa el despliegue al presionar el botón */
   .navbar nav.show {
-    display: flex;
+    display: flex !important;
   }
 }
