@@ -31,6 +31,20 @@
       "purpose": "any maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Ver Tasas",
+      "short_name": "Tasas",
+      "description": "Consulta las tasas actualizadas del día",
+      "url": "/tasas",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
   "screenshots": [
     {
       "src": "/screenshots/screenshot-mobile.png",
