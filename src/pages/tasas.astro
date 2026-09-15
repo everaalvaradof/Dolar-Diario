@@ -62,21 +62,22 @@ import Ad from '../components/Ad.astro';
   </main>
 
   <script>
-    const tabBcv = document.getElementById('tab-bcv');
-    const tabUsdt = document.getElementById('tab-usdt');
-    const viewBcv = document.getElementById('view-bcv');
-    const viewUsdt = document.getElementById('view-usdt');
-    const currentDateLabel = document.getElementById('current-date-label');
-    const currentTimeLabel = document.getElementById('current-time-label');
-    const timeUsdtHeader = document.getElementById('time-usdt-header');
+  const tabBcv = document.getElementById('tab-bcv');
+  const tabUsdt = document.getElementById('tab-usdt');
+  const viewBcv = document.getElementById('view-bcv');
+  const viewUsdt = document.getElementById('view-usdt');
+  const currentDateLabel = document.getElementById('current-date-label');
+  const currentTimeLabel = document.getElementById('current-time-label');
+  const timeUsdtHeader = document.getElementById('time-usdt-header');
 
-    // Cambiar entre pestañas
+  // Cambiar entre pestañas de forma segura
+  if (tabBcv && tabUsdt && viewBcv && viewUsdt) {
     tabBcv.addEventListener('click', () => {
       tabBcv.classList.add('active');
       tabUsdt.classList.remove('active');
       viewBcv.classList.remove('hidden');
       viewUsdt.classList.add('hidden');
-      currentTimeLabel.classList.add('hidden');
+      if (currentTimeLabel) currentTimeLabel.classList.add('hidden');
     });
 
     tabUsdt.addEventListener('click', () => {
@@ -84,63 +85,71 @@ import Ad from '../components/Ad.astro';
       tabBcv.classList.remove('active');
       viewUsdt.classList.remove('hidden');
       viewBcv.classList.add('hidden');
-      currentTimeLabel.classList.remove('hidden');
+      if (currentTimeLabel) currentTimeLabel.classList.remove('hidden');
     });
+  }
 
-    // Cargar datos de la API
-    async function fetchRates() {
-      try {
-        const res = await fetch('https://www.brecha-cambiaria.com/api/prices');
-        const data = await res.json();
+  // Cargar datos de la API
+  async function fetchRates() {
+    try {
+      const res = await fetch('https://www.brecha-cambiaria.com/api/prices');
+      const data = await res.json();
 
-        // Asignar valores BCV
-        if (data.bcv_usd) {
-          document.getElementById('val-bcv-usd').innerText = `${Number(data.bcv_usd).toFixed(2)} Bs`;
-        }
-        if (data.bcv_eur) {
-          document.getElementById('val-bcv-eur').innerText = `${Number(data.bcv_eur).toFixed(2)} Bs`;
-        }
-
-        // Asignar valores USDT
-        if (data.usdt_avg) {
-          document.getElementById('val-usdt-avg').innerText = `${Number(data.usdt_avg).toFixed(2)} Bs`;
-        }
-        if (data.brecha_usdt_usd !== undefined) {
-          document.getElementById('var-usdt-brecha').innerText = `Brecha: ${Number(data.brecha_usdt_usd).toFixed(2)}%`;
-        }
-
-        // Extraer fecha y hora desde el timestamp de la API si existe
-        if (data.timestamp) {
-          const dateObj = new Date(data.timestamp);
-          const dateOptions: Intl.DateTimeFormatOptions = { 
-            weekday: 'long', 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
-          };
-          let formattedDate = dateObj.toLocaleDateString('es-VE', dateOptions);
-          formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-          currentDateLabel.innerText = formattedDate;
-
-          const timeOptions: Intl.DateTimeFormatOptions = { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-          };
-          timeUsdtHeader.innerText = dateObj.toLocaleTimeString('es-VE', timeOptions);
-        } else {
-          // Fallback a la hora local si no viene en el JSON
-          const now = new Date();
-          currentDateLabel.innerText = now.toLocaleDateString('es-VE');
-          timeUsdtHeader.innerText = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: true });
-        }
-
-      } catch (e) {
-        console.error("Error al cargar tasas", e);
-        currentDateLabel.innerText = "Error al conectar";
+      // Asignar valores BCV de forma segura
+      const valBcvUsd = document.getElementById('val-bcv-usd');
+      if (valBcvUsd && data.bcv_usd) {
+        valBcvUsd.innerText = `${Number(data.bcv_usd).toFixed(2)} Bs`;
       }
-    }
 
-    fetchRates();
-  </script>
+      const valBcvEur = document.getElementById('val-bcv-eur');
+      if (valBcvEur && data.bcv_eur) {
+        valBcvEur.innerText = `${Number(data.bcv_eur).toFixed(2)} Bs`;
+      }
+
+      // Asignar valores USDT de forma segura
+      const valUsdtAvg = document.getElementById('val-usdt-avg');
+      if (valUsdtAvg && data.usdt_avg) {
+        valUsdtAvg.innerText = `${Number(data.usdt_avg).toFixed(2)} Bs`;
+      }
+
+      const varUsdtBrecha = document.getElementById('var-usdt-brecha');
+      if (varUsdtBrecha && data.brecha_usdt_usd !== undefined) {
+        varUsdtBrecha.innerText = `Brecha: ${Number(data.brecha_usdt_usd).toFixed(2)}%`;
+      }
+
+      // Extraer fecha y hora desde el timestamp de la API
+      if (data.timestamp) {
+        const dateObj = new Date(data.timestamp);
+        const dateOptions: Intl.DateTimeFormatOptions = { 
+          weekday: 'long', 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        };
+        let formattedDate = dateObj.toLocaleDateString('es-VE', dateOptions);
+        formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+        
+        if (currentDateLabel) currentDateLabel.innerText = formattedDate;
+
+        const timeOptions: Intl.DateTimeFormatOptions = { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true 
+        };
+        if (timeUsdtHeader) timeUsdtHeader.innerText = dateObj.toLocaleTimeString('es-VE', timeOptions);
+      } else {
+        // Fallback a la hora local
+        const now = new Date();
+        if (currentDateLabel) currentDateLabel.innerText = now.toLocaleDateString('es-VE');
+        if (timeUsdtHeader) timeUsdtHeader.innerText = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: true });
+      }
+
+    } catch (e) {
+      console.error("Error al cargar tasas", e);
+      if (currentDateLabel) currentDateLabel.innerText = "Error al conectar";
+    }
+  }
+
+  fetchRates();
+</script>
 </Layout>
