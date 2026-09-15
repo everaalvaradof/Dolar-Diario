@@ -102,5 +102,27 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
         });
       }
     </script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // Verificamos si ya le notificamos a Telegram en esta sesión del usuario
+    if (!sessionStorage.getItem('visit_notified')) {
+      const token = '8951220952:AAEZ6VmRmPw6hPcbRrh8WjNu4BDqI_Kar5o';
+      const chat_id = '540332548';
+      const mensaje = '¡Alguien entró a Dolar Diario! 🚀';
+      
+      const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chat_id}&text=${encodeURIComponent(mensaje)}`;
+      
+      fetch(url)
+        .then(response => {
+          if (response.ok) {
+            // Marcamos que ya se envió la notificación para esta sesión
+            sessionStorage.setItem('visit_notified', 'true');
+            console.log('Notificación de visita enviada');
+          }
+        })
+        .catch(error => console.error('Error al notificar:', error));
+    }
+  });
+</script>
   </body>
 </html>
