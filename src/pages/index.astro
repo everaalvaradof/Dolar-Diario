@@ -13,6 +13,13 @@ import Ad from '../components/Ad.astro';
       <span class="logo-text">Dolar Hoy</span>
     </div>
 
+    <!-- Botón de instalación (Oculto por defecto hasta que el navegador permita instalar) -->
+    <div id="install-container" class="install-container hidden" style="margin-bottom: 1rem; text-align: center;">
+      <button id="install-btn" class="install-btn" style="background: #2563eb; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 9999px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        📱 Instalar App en el Teléfono
+      </button>
+    </div>
+
     <div class="calculator-card">
       <!-- Selector de Tasa -->
       <div class="rate-selector-wrapper">
@@ -59,163 +66,206 @@ import Ad from '../components/Ad.astro';
   </main>
 
   <script>
-  // Definimos la estructura de los datos que vienen de la API
-  interface RateData {
-    bcv_usd?: number;
-    bcv_eur?: number;
-    usdt_avg?: number;
-    brecha_usdt_usd?: number;
-    brecha_usdt_eur?: number;
-    [key: string]: any;
-  }
+    // Definimos la estructura de los datos que vienen de la API
+    interface RateData {
+      bcv_usd?: number;
+      bcv_eur?: number;
+      usdt_avg?: number;
+      brecha_usdt_usd?: number;
+      brecha_usdt_eur?: number;
+      [key: string]: any;
+    }
 
-  let currentActiveRecord: RateData | null = null;
-  let activeRateType: keyof typeof rateConfig = 'bcv_usd';
+    let currentActiveRecord: RateData | null = null;
+    let activeRateType: keyof typeof rateConfig = 'bcv_usd';
 
-  const rateBtn = document.getElementById('rate-btn');
-  const rateDropdown = document.getElementById('rate-dropdown');
-  const currentRateName = document.getElementById('current-rate-name');
-  const inputExt = document.getElementById('input-ext') as HTMLInputElement;
-  const inputBs = document.getElementById('input-bs') as HTMLInputElement;
-  const symbolExt = document.getElementById('symbol-ext');
-  const rateDateLabel = document.getElementById('rate-date-label');
-  const brechaValue = document.getElementById('brecha-value');
+    const rateBtn = document.getElementById('rate-btn');
+    const rateDropdown = document.getElementById('rate-dropdown');
+    const currentRateName = document.getElementById('current-rate-name');
+    const inputExt = document.getElementById('input-ext') as HTMLInputElement;
+    const inputBs = document.getElementById('input-bs') as HTMLInputElement;
+    const symbolExt = document.getElementById('symbol-ext');
+    const rateDateLabel = document.getElementById('rate-date-label');
+    const brechaValue = document.getElementById('brecha-value');
 
-  const rateConfig = {
-    bcv_usd: { name: 'Dólar BCV', symbol: '$' },
-    bcv_eur: { name: 'Euro BCV', symbol: '€' },
-    usdt_avg: { name: 'Binance P2P (USDT)', symbol: '$' }
-  };
-
-  // Función para obtener la fecha y opcionalmente la hora actual
-  function getDateTime(includeTime = false): string {
-    const now = new Date();
-    const dateOptions: Intl.DateTimeFormatOptions = { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
+    const rateConfig = {
+      bcv_usd: { name: 'Dólar BCV', symbol: '$' },
+      bcv_eur: { name: 'Euro BCV', symbol: '€' },
+      usdt_avg: { name: 'Binance P2P (USDT)', symbol: '$' }
     };
-    
-    const fecha = now.toLocaleDateString('es-VE', dateOptions);
 
-    if (includeTime) {
-      const timeOptions: Intl.DateTimeFormatOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: true 
-      };
-      const hora = now.toLocaleTimeString('es-VE', timeOptions);
-      return `${fecha} - ${hora}`;
-    }
+    // --- LÓGICA DE INSTALACIÓN PWA ---
+    let deferredPrompt: any = null;
+    const installContainer = document.getElementById('install-container');
+    const installBtn = document.getElementById('install-btn');
 
-    return fecha;
-  }
-
-  async function initLatest(): Promise<void> {
-    try {
-      const resPrices = await fetch('https://www.brecha-cambiaria.com/api/prices');
-      const dataPrices: RateData = await resPrices.json();
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Previene que Chrome muestre su barra predeterminada automática
+      e.preventDefault();
+      deferredPrompt = e;
       
-      currentActiveRecord = dataPrices;
-      applyRateData(currentActiveRecord);
-    } catch (e) {
-      console.error("Error al conectar con la API", e);
-      if (currentRateName) currentRateName.innerText = "Error de conexión";
-    }
-  }
-
-  function applyRateData(record: RateData | null): void {
-    if (!record) return;
-
-    if (currentRateName) currentRateName.innerText = rateConfig[activeRateType].name;
-    if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
-
-    const currentRate = Number(record[activeRateType]) || 0;
-    const extVal = parseFloat(inputExt?.value || '0') || 0;
-    
-    if (inputBs) {
-      inputBs.value = (extVal * currentRate).toFixed(2);
-    }
-
-    if (brechaValue) {
-      if (activeRateType === 'bcv_eur') {
-        const bEur = record.brecha_usdt_eur !== undefined ? record.brecha_usdt_eur : 0;
-        brechaValue.innerText = `${Number(bEur).toFixed(2)}%`;
-      } else if (activeRateType === 'usdt_avg') {
-        brechaValue.innerText = `0.00%`;
-      } else {
-        const bUsd = record.brecha_usdt_usd !== undefined ? record.brecha_usdt_usd : 0;
-        brechaValue.innerText = `${Number(bUsd).toFixed(2)}%`;
-      }
-    }
-
-    // Si es USDT muestra fecha y hora, si es BCV muestra solo la fecha
-    const showTime = (activeRateType === 'usdt_avg');
-    const timestamp = getDateTime(showTime);
-    if (rateDateLabel) {
-      rateDateLabel.innerText = `Actualizado: ${timestamp}`;
-    }
-  }
-
-  if (inputExt) {
-    inputExt.addEventListener('input', () => {
-      if (!currentActiveRecord) return;
-      const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
-      const val = parseFloat(inputExt.value) || 0;
-      if (inputBs) {
-        inputBs.value = (val * currentRate).toFixed(2);
+      // Muestra nuestro botón personalizado
+      if (installContainer) {
+        installContainer.classList.remove('hidden');
       }
     });
-  }
 
-  if (inputBs) {
-    inputBs.addEventListener('input', () => {
-      if (!currentActiveRecord) return;
-      const currentRate = Number(currentActiveRecord[activeRateType]) || 1;
-      const val = parseFloat(inputBs.value) || 0;
-      if (inputExt) {
-        inputExt.value = (val / currentRate).toFixed(2);
-      }
-    });
-  }
-
-  if (rateBtn && rateDropdown) {
-    rateBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      rateDropdown.classList.toggle('hidden');
-    });
-
-    window.addEventListener('click', () => {
-      rateDropdown.classList.add('hidden');
-    });
-
-    rateDropdown.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement | null;
-        const dataType = target?.getAttribute('data-type');
-        if (dataType && (dataType === 'bcv_usd' || dataType === 'bcv_eur' || dataType === 'usdt_avg')) {
-          activeRateType = dataType;
-          applyRateData(currentActiveRecord);
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        // Muestra el aviso nativo del teléfono al hacer clic
+        deferredPrompt.prompt();
+        
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('El usuario aceptó instalar la PWA');
+        }
+        
+        deferredPrompt = null;
+        if (installContainer) {
+          installContainer.classList.add('hidden');
         }
       });
-    });
-  }
+    }
 
-  const copyExtBtn = document.getElementById('copy-ext');
-  if (copyExtBtn && inputExt) {
-    copyExtBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(inputExt.value);
+    window.addEventListener('appinstalled', () => {
+      console.log('¡PWA instalada con éxito!');
+      if (installContainer) {
+        installContainer.classList.add('hidden');
+      }
     });
-  }
+    // ---------------------------------
 
-  const copyBsBtn = document.getElementById('copy-bs');
-  if (copyBsBtn && inputBs) {
-    copyBsBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(inputBs.value);
-    });
-  }
+    // Función para obtener la fecha y opcionalmente la hora actual
+    function getDateTime(includeTime = false): string {
+      const now = new Date();
+      const dateOptions: Intl.DateTimeFormatOptions = { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      };
+      
+      const fecha = now.toLocaleDateString('es-VE', dateOptions);
 
-  initLatest();
-</script>
+      if (includeTime) {
+        const timeOptions: Intl.DateTimeFormatOptions = { 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit',
+          hour12: true 
+        };
+        const hora = now.toLocaleTimeString('es-VE', timeOptions);
+        return `${fecha} - ${hora}`;
+      }
+
+      return fecha;
+    }
+
+    async function initLatest(): Promise<void> {
+      try {
+        const resPrices = await fetch('https://www.brecha-cambiaria.com/api/prices');
+        const dataPrices: RateData = await resPrices.json();
+        
+        currentActiveRecord = dataPrices;
+        applyRateData(currentActiveRecord);
+      } catch (e) {
+        console.error("Error al conectar con la API", e);
+        if (currentRateName) currentRateName.innerText = "Error de conexión";
+      }
+    }
+
+    function applyRateData(record: RateData | null): void {
+      if (!record) return;
+
+      if (currentRateName) currentRateName.innerText = rateConfig[activeRateType].name;
+      if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
+
+      const currentRate = Number(record[activeRateType]) || 0;
+      const extVal = parseFloat(inputExt?.value || '0') || 0;
+      
+      if (inputBs) {
+        inputBs.value = (extVal * currentRate).toFixed(2);
+      }
+
+      if (brechaValue) {
+        if (activeRateType === 'bcv_eur') {
+          const bEur = record.brecha_usdt_eur !== undefined ? record.brecha_usdt_eur : 0;
+          brechaValue.innerText = `${Number(bEur).toFixed(2)}%`;
+        } else if (activeRateType === 'usdt_avg') {
+          brechaValue.innerText = `0.00%`;
+        } else {
+          const bUsd = record.brecha_usdt_usd !== undefined ? record.brecha_usdt_usd : 0;
+          brechaValue.innerText = `${Number(bUsd).toFixed(2)}%`;
+        }
+      }
+
+      // Si es USDT muestra fecha y hora, si es BCV muestra solo la fecha
+      const showTime = (activeRateType === 'usdt_avg');
+      const timestamp = getDateTime(showTime);
+      if (rateDateLabel) {
+        rateDateLabel.innerText = `Actualizado: ${timestamp}`;
+      }
+    }
+
+    if (inputExt) {
+      inputExt.addEventListener('input', () => {
+        if (!currentActiveRecord) return;
+        const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
+        const val = parseFloat(inputExt.value) || 0;
+        if (inputBs) {
+          inputBs.value = (val * currentRate).toFixed(2);
+        }
+      });
+    }
+
+    if (inputBs) {
+      inputBs.addEventListener('input', () => {
+        if (!currentActiveRecord) return;
+        const currentRate = Number(currentActiveRecord[activeRateType]) || 1;
+        const val = parseFloat(inputBs.value) || 0;
+        if (inputExt) {
+          inputExt.value = (val / currentRate).toFixed(2);
+        }
+      });
+    }
+
+    if (rateBtn && rateDropdown) {
+      rateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        rateDropdown.classList.toggle('hidden');
+      });
+
+      window.addEventListener('click', () => {
+        rateDropdown.classList.add('hidden');
+      });
+
+      rateDropdown.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const target = e.currentTarget as HTMLElement | null;
+          const dataType = target?.getAttribute('data-type');
+          if (dataType && (dataType === 'bcv_usd' || dataType === 'bcv_eur' || dataType === 'usdt_avg')) {
+            activeRateType = dataType;
+            applyRateData(currentActiveRecord);
+          }
+        });
+      });
+    }
+
+    const copyExtBtn = document.getElementById('copy-ext');
+    if (copyExtBtn && inputExt) {
+      copyExtBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(inputExt.value);
+      });
+    }
+
+    const copyBsBtn = document.getElementById('copy-bs');
+    if (copyBsBtn && inputBs) {
+      copyBsBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(inputBs.value);
+      });
+    }
+
+    initLatest();
+  </script>
 </Layout>
