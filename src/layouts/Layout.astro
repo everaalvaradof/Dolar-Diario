@@ -47,12 +47,36 @@ const { title = "Dolar Diario - Calculadora de Tasas Venezuela" } = Astro.props;
         <nav id="nav-menu">
           <a href="/" class="active">Calculadora</a>
           <a href="/tasas">Tasas</a>
-          
         </nav>
       </div>
     </header>
 
-    <slot />
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Tasas actualizadas gracias a la API de 
+        <a href="https://www.brecha-cambiaria.com/" target="_blank" rel="noopener noreferrer">Brecha Cambiaria</a>.
+      </p>
+    </footer>
+
+    <style>
+      .site-footer {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        font-size: 0.85rem;
+        opacity: 0.8;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 2rem;
+      }
+      .site-footer a {
+        color: inherit;
+        text-decoration: underline;
+        font-weight: 500;
+      }
+    </style>
 
     <script>
       // Lógica del menú desplegable
