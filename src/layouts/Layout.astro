@@ -43,6 +43,7 @@ const { title = "Al Cambio - Calculadora de Tasas Venezuela" } = Astro.props;
     <slot />
 
     <script>
+      // Lógica del menú desplegable
       const menuToggle = document.getElementById('menu-toggle');
       const navMenu = document.getElementById('nav-menu');
 
@@ -54,6 +55,14 @@ const { title = "Al Cambio - Calculadora de Tasas Venezuela" } = Astro.props;
 
         window.addEventListener('click', () => {
           navMenu.classList.remove('show');
+        });
+      }
+
+      // Registro del Service Worker para PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .catch(err => console.log('Error al registrar el Service Worker:', err));
         });
       }
     </script>

@@ -59,72 +59,86 @@ import Ad from '../components/Ad.astro';
   </main>
 
   <script>
-    let currentActiveRecord = null;
-    let activeRateType = 'bcv_usd';
+  // Definimos la estructura de los datos que vienen de la API
+  interface RateData {
+    bcv_usd?: number;
+    bcv_eur?: number;
+    usdt_avg?: number;
+    brecha_usdt_usd?: number;
+    brecha_usdt_eur?: number;
+    [key: string]: any;
+  }
 
-    const rateBtn = document.getElementById('rate-btn');
-    const rateDropdown = document.getElementById('rate-dropdown');
-    const currentRateName = document.getElementById('current-rate-name');
-    const inputExt = document.getElementById('input-ext') as HTMLInputElement;
-    const inputBs = document.getElementById('input-bs') as HTMLInputElement;
-    const symbolExt = document.getElementById('symbol-ext');
-    const rateDateLabel = document.getElementById('rate-date-label');
-    const brechaValue = document.getElementById('brecha-value');
+  let currentActiveRecord: RateData | null = null;
+  let activeRateType: keyof typeof rateConfig = 'bcv_usd';
 
-    const rateConfig = {
-      bcv_usd: { name: 'Dólar BCV', symbol: '$' },
-      bcv_eur: { name: 'Euro BCV', symbol: '€' },
-      usdt_avg: { name: 'Binance P2P (USDT)', symbol: '$' }
+  const rateBtn = document.getElementById('rate-btn');
+  const rateDropdown = document.getElementById('rate-dropdown');
+  const currentRateName = document.getElementById('current-rate-name');
+  const inputExt = document.getElementById('input-ext') as HTMLInputElement;
+  const inputBs = document.getElementById('input-bs') as HTMLInputElement;
+  const symbolExt = document.getElementById('symbol-ext');
+  const rateDateLabel = document.getElementById('rate-date-label');
+  const brechaValue = document.getElementById('brecha-value');
+
+  const rateConfig = {
+    bcv_usd: { name: 'Dólar BCV', symbol: '$' },
+    bcv_eur: { name: 'Euro BCV', symbol: '€' },
+    usdt_avg: { name: 'Binance P2P (USDT)', symbol: '$' }
+  };
+
+  // Función para obtener la fecha y opcionalmente la hora actual
+  function getDateTime(includeTime = false): string {
+    const now = new Date();
+    const dateOptions: Intl.DateTimeFormatOptions = { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
     };
+    
+    const fecha = now.toLocaleDateString('es-VE', dateOptions);
 
-    // Función para obtener la fecha y opcionalmente la hora actual
-    function getDateTime(includeTime = false) {
-      const now = new Date();
-      const dateOptions: Intl.DateTimeFormatOptions = { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
+    if (includeTime) {
+      const timeOptions: Intl.DateTimeFormatOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
       };
+      const hora = now.toLocaleTimeString('es-VE', timeOptions);
+      return `${fecha} - ${hora}`;
+    }
+
+    return fecha;
+  }
+
+  async function initLatest(): Promise<void> {
+    try {
+      const resPrices = await fetch('https://www.brecha-cambiaria.com/api/prices');
+      const dataPrices: RateData = await resPrices.json();
       
-      const fecha = now.toLocaleDateString('es-VE', dateOptions);
-
-      if (includeTime) {
-        const timeOptions: Intl.DateTimeFormatOptions = { 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit',
-          hour12: true 
-        };
-        const hora = now.toLocaleTimeString('es-VE', timeOptions);
-        return `${fecha} - ${hora}`;
-      }
-
-      return fecha;
+      currentActiveRecord = dataPrices;
+      applyRateData(currentActiveRecord);
+    } catch (e) {
+      console.error("Error al conectar con la API", e);
+      if (currentRateName) currentRateName.innerText = "Error de conexión";
     }
+  }
 
-    async function initLatest() {
-      try {
-        const resPrices = await fetch('https://www.brecha-cambiaria.com/api/prices');
-        const dataPrices = await resPrices.json();
-        
-        currentActiveRecord = dataPrices;
-        applyRateData(currentActiveRecord);
-      } catch (e) {
-        console.error("Error al conectar con la API", e);
-        if (currentRateName) currentRateName.innerText = "Error de conexión";
-      }
-    }
+  function applyRateData(record: RateData | null): void {
+    if (!record) return;
 
-    function applyRateData(record) {
-      if (!record) return;
+    if (currentRateName) currentRateName.innerText = rateConfig[activeRateType].name;
+    if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
 
-      if (currentRateName) currentRateName.innerText = rateConfig[activeRateType].name;
-      if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
-
-      const currentRate = record[activeRateType] || 0;
-      const extVal = parseFloat(inputExt.value) || 0;
+    const currentRate = Number(record[activeRateType]) || 0;
+    const extVal = parseFloat(inputExt?.value || '0') || 0;
+    
+    if (inputBs) {
       inputBs.value = (extVal * currentRate).toFixed(2);
+    }
 
+    if (brechaValue) {
       if (activeRateType === 'bcv_eur') {
         const bEur = record.brecha_usdt_eur !== undefined ? record.brecha_usdt_eur : 0;
         brechaValue.innerText = `${Number(bEur).toFixed(2)}%`;
@@ -134,27 +148,39 @@ import Ad from '../components/Ad.astro';
         const bUsd = record.brecha_usdt_usd !== undefined ? record.brecha_usdt_usd : 0;
         brechaValue.innerText = `${Number(bUsd).toFixed(2)}%`;
       }
-
-      // Si es USDT muestra fecha y hora, si es BCV muestra solo la fecha
-      const showTime = (activeRateType === 'usdt_avg');
-      const timestamp = getDateTime(showTime);
-      rateDateLabel.innerText = `Actualizado: ${timestamp}`;
     }
 
+    // Si es USDT muestra fecha y hora, si es BCV muestra solo la fecha
+    const showTime = (activeRateType === 'usdt_avg');
+    const timestamp = getDateTime(showTime);
+    if (rateDateLabel) {
+      rateDateLabel.innerText = `Actualizado: ${timestamp}`;
+    }
+  }
+
+  if (inputExt) {
     inputExt.addEventListener('input', () => {
       if (!currentActiveRecord) return;
-      const currentRate = currentActiveRecord[activeRateType] || 0;
+      const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
       const val = parseFloat(inputExt.value) || 0;
-      inputBs.value = (val * currentRate).toFixed(2);
+      if (inputBs) {
+        inputBs.value = (val * currentRate).toFixed(2);
+      }
     });
+  }
 
+  if (inputBs) {
     inputBs.addEventListener('input', () => {
       if (!currentActiveRecord) return;
-      const currentRate = currentActiveRecord[activeRateType] || 1;
+      const currentRate = Number(currentActiveRecord[activeRateType]) || 1;
       const val = parseFloat(inputBs.value) || 0;
-      inputExt.value = (val / currentRate).toFixed(2);
+      if (inputExt) {
+        inputExt.value = (val / currentRate).toFixed(2);
+      }
     });
+  }
 
+  if (rateBtn && rateDropdown) {
     rateBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       rateDropdown.classList.toggle('hidden');
@@ -166,19 +192,30 @@ import Ad from '../components/Ad.astro';
 
     rateDropdown.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        activeRateType = (e.target as HTMLElement).getAttribute('data-type');
-        applyRateData(currentActiveRecord);
+        const target = e.currentTarget as HTMLElement | null;
+        const dataType = target?.getAttribute('data-type');
+        if (dataType && (dataType === 'bcv_usd' || dataType === 'bcv_eur' || dataType === 'usdt_avg')) {
+          activeRateType = dataType;
+          applyRateData(currentActiveRecord);
+        }
       });
     });
+  }
 
-    document.getElementById('copy-ext').addEventListener('click', () => {
+  const copyExtBtn = document.getElementById('copy-ext');
+  if (copyExtBtn && inputExt) {
+    copyExtBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(inputExt.value);
     });
+  }
 
-    document.getElementById('copy-bs').addEventListener('click', () => {
+  const copyBsBtn = document.getElementById('copy-bs');
+  if (copyBsBtn && inputBs) {
+    copyBsBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(inputBs.value);
     });
+  }
 
-    initLatest();
-  </script>
+  initLatest();
+</script>
 </Layout>
