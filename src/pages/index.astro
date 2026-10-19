@@ -41,10 +41,10 @@ import Ad from '../components/Ad.astro';
         <button class="copy-btn" id="copy-bs" title="Copiar valor">📋</button>
       </div>
 
-      <!-- Botón para Borrar Todo -->
+      <!-- Botón para Restablecer a 1.00 -->
       <div style="text-align: center; margin-top: 1rem; margin-bottom: 0.5rem;">
         <button id="clear-all-btn" class="clear-all-btn">
-          🧹 Borrar todo
+          🔄 Restablecer a 1
         </button>
       </div>
 
@@ -181,7 +181,7 @@ import Ad from '../components/Ad.astro';
       if (symbolExt) symbolExt.innerText = rateConfig[activeRateType].symbol;
 
       const currentRate = Number(record[activeRateType]) || 0;
-      const extVal = parseFloat(inputExt?.value || '0') || 0;
+      const extVal = parseFloat(inputExt?.value || '1.00') || 1.00;
       
       if (inputBs) {
         inputBs.value = (extVal * currentRate).toFixed(2);
@@ -243,13 +243,19 @@ import Ad from '../components/Ad.astro';
       });
     }
 
-    // LÓGICA DEL BOTÓN BORRAR TODO
+    // LÓGICA DE RESTABLECER A 1
     const clearAllBtn = document.getElementById('clear-all-btn');
     if (clearAllBtn) {
       clearAllBtn.addEventListener('click', () => {
-        if (inputExt) inputExt.value = '';
-        if (inputBs) inputBs.value = '';
-        if (inputExt) inputExt.focus();
+        if (inputExt) inputExt.value = '1.00';
+        if (currentActiveRecord) {
+          const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
+          if (inputBs) inputBs.value = currentRate.toFixed(2);
+        }
+        if (inputExt) {
+          inputExt.focus();
+          inputExt.select();
+        }
       });
     }
 
