@@ -13,6 +13,9 @@
   async function cargarPrecios() {
     const container = document.getElementById('tasas-container');
     
+    // Si no encuentra el contenedor en el DOM, se detiene para evitar errores
+    if (!container) return;
+    
     try {
       const response = await fetch('https://www.brecha-cambiaria.com/api/prices');
       const data = await response.json();

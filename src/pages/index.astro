@@ -5,8 +5,6 @@ import Ad from '../components/Ad.astro';
 
 <Layout>
   <main class="container">
-   
-
     <!-- Botón de instalación (Oculto por defecto hasta que el navegador permita instalar) -->
     <div id="install-container" class="install-container hidden" style="margin-bottom: 1rem; text-align: center;">
       <button id="install-btn" class="install-btn" style="background: #2563eb; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 9999px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
@@ -32,15 +30,22 @@ import Ad from '../components/Ad.astro';
       <!-- Input de Moneda Extranjera -->
       <div class="input-group">
         <label id="symbol-ext" for="input-ext">$</label>
-        <input type="number" id="input-ext" value="1.00" step="any" />
+        <input type="number" id="input-ext" value="1.00" step="any" inputmode="decimal" />
         <button class="copy-btn" id="copy-ext" title="Copiar valor">📋</button>
       </div>
 
       <!-- Input de Bolívares -->
       <div class="input-group">
         <label for="input-bs">Bs</label>
-        <input type="number" id="input-bs" value="0.00" step="any" />
+        <input type="number" id="input-bs" value="0.00" step="any" inputmode="decimal" />
         <button class="copy-btn" id="copy-bs" title="Copiar valor">📋</button>
+      </div>
+
+      <!-- Botón para Borrar Todo -->
+      <div style="text-align: center; margin-top: 1rem; margin-bottom: 0.5rem;">
+        <button id="clear-all-btn" class="clear-all-btn">
+          🧹 Borrar todo
+        </button>
       </div>
 
       <!-- Indicador de Fecha y Hora -->
@@ -68,7 +73,6 @@ import Ad from '../components/Ad.astro';
       </button>
     </div>
   </main>
-
 
   <script>
     // Definimos la estructura de los datos que vienen de la API
@@ -133,7 +137,6 @@ import Ad from '../components/Ad.astro';
         installContainer.classList.add('hidden');
       }
     });
-    // ---------------------------------
 
     function getDateTime(includeTime = false): string {
       const now = new Date();
@@ -203,10 +206,18 @@ import Ad from '../components/Ad.astro';
       }
     }
 
+    // --- MANEJO DE INPUTS ---
     if (inputExt) {
+      inputExt.addEventListener('focus', () => inputExt.select());
+      inputExt.addEventListener('click', () => inputExt.select());
+
       inputExt.addEventListener('input', () => {
         if (!currentActiveRecord) return;
         const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
+        if (inputExt.value === '') {
+          if (inputBs) inputBs.value = '';
+          return;
+        }
         const val = parseFloat(inputExt.value) || 0;
         if (inputBs) {
           inputBs.value = (val * currentRate).toFixed(2);
@@ -215,13 +226,30 @@ import Ad from '../components/Ad.astro';
     }
 
     if (inputBs) {
+      inputBs.addEventListener('focus', () => inputBs.select());
+      inputBs.addEventListener('click', () => inputBs.select());
+
       inputBs.addEventListener('input', () => {
         if (!currentActiveRecord) return;
         const currentRate = Number(currentActiveRecord[activeRateType]) || 1;
+        if (inputBs.value === '') {
+          if (inputExt) inputExt.value = '';
+          return;
+        }
         const val = parseFloat(inputBs.value) || 0;
         if (inputExt) {
           inputExt.value = (val / currentRate).toFixed(2);
         }
+      });
+    }
+
+    // LÓGICA DEL BOTÓN BORRAR TODO
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', () => {
+        if (inputExt) inputExt.value = '';
+        if (inputBs) inputBs.value = '';
+        if (inputExt) inputExt.focus();
       });
     }
 
