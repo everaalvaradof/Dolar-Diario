@@ -12,7 +12,7 @@ import Ad from '../components/Ad.astro';
       </button>
     </div>
 
-    <!-- Tarjeta principal de la calculadora (Área de captura) -->
+    <!-- Tarjeta principal de la calculadora -->
     <div class="calculator-card">
       <!-- Selector de Tasa -->
       <div class="rate-selector-wrapper">
@@ -64,10 +64,13 @@ import Ad from '../components/Ad.astro';
       <span>Brecha: <strong id="brecha-value">--%</strong> ↑</span>
     </div>
 
-    <!-- Botón de Compartir Captura -->
+    <!-- Botón de Compartir Cálculo en el Teléfono -->
     <div style="text-align: center; margin-top: 1rem;">
-      <button id="share-screenshot-btn" class="whatsapp-share-btn" style="background: #0284c7;">
-        📸 Compartir Imagen / Captura
+      <button id="share-calc-btn" class="whatsapp-share-btn" style="background: #25d366; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+        Compartir Conversión Actual
       </button>
     </div>
   </main>
@@ -122,13 +125,9 @@ import Ad from '../components/Ad.astro';
 
     // --- FORMATEO EN VIVO TIPO BANCO ---
     function formatInputLive(value: string): string {
-      // Limpia todo menos los números
       let digits = value.replace(/\D/g, '');
       if (!digits) return '0,00';
-
-      // Convierte a número flotante asumiendo que los últimos 2 dígitos son centavos
       let numberVal = parseFloat(digits) / 100;
-
       return new Intl.NumberFormat('es-VE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -174,7 +173,7 @@ import Ad from '../components/Ad.astro';
       const extVal = parseNum(inputExt?.value || '1,00');
       
       if (inputBs) {
-        inputBs.value = formatInputLive((extVal * 100).toFixed(0));
+        inputBs.value = formatInputLive((extVal * currentRate * 100).toFixed(0));
       }
 
       if (brechaValue) {
@@ -272,54 +271,32 @@ import Ad from '../components/Ad.astro';
       });
     }
 
-    // LÓGICA DE COMPARTIR CAPTURA
-    const shareScreenshotBtn = document.getElementById('share-screenshot-btn');
-    const captureArea = document.querySelector('.calculator-card');
+    // --- LÓGICA DE COMPARTIR TEXTO / CONVERSIÓN NATIVA ---
+    const shareCalcBtn = document.getElementById('share-calc-btn');
+    if (shareCalcBtn) {
+      shareCalcBtn.addEventListener('click', async () => {
+        const rateName = currentRateName ? currentRateName.innerText : 'Tasa';
+        const valExt = inputExt ? inputExt.value : '0,00';
+        const valBs = inputBs ? inputBs.value : '0,00';
+        const symbol = rateConfig[activeRateType].symbol;
 
-    if (shareScreenshotBtn && captureArea) {
-      shareScreenshotBtn.addEventListener('click', async () => {
-        try {
-          const originalText = shareScreenshotBtn.innerHTML;
-          shareScreenshotBtn.innerHTML = '📸 Generando imagen...';
-          shareScreenshotBtn.setAttribute('disabled', 'true');
+        const shareText = `🧮 *Dolar Diario* (${rateName})\n` +
+                          `• ${symbol} ${valExt} = *Bs. ${valBs}*\n` +
+                          `🚀 ¡Calculado al instante con Dolar Diario!`;
 
-          // @ts-ignore
-          const canvas = await html2canvas(captureArea, {
-            backgroundColor: '#121212',
-            scale: 2,
-            useCORS: true
-          });
-
-          canvas.toBlob(async (blob: Blob | null) => {
-            if (!blob) {
-              shareScreenshotBtn.innerHTML = originalText;
-              shareScreenshotBtn.removeAttribute('disabled');
-              return;
-            }
-
-            const file = new File([blob], 'dolar-diario.png', { type: 'image/png' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: 'Dolar Diario',
-                text: 'Tasas actuales en Dolar Diario 🚀'
-              });
-            } else {
-              const link = document.createElement('a');
-              link.download = 'dolar-diario.png';
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-            }
-
-            shareScreenshotBtn.innerHTML = originalText;
-            shareScreenshotBtn.removeAttribute('disabled');
-          }, 'image/png');
-
-        } catch (error) {
-          console.error('Error al capturar:', error);
-          shareScreenshotBtn.innerHTML = '📸 Compartir Imagen / Captura';
-          shareScreenshotBtn.removeAttribute('disabled');
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Conversión Dolar Diario',
+              text: shareText
+            });
+          } catch (err) {
+            console.log('Compartir cancelado o error', err);
+          }
+        } else {
+          // Fallback para abrir WhatsApp directo si no soporta navigator.share
+          const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+          window.open(url, '_blank');
         }
       });
     }
