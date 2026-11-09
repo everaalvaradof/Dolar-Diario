@@ -12,6 +12,7 @@ import Ad from '../components/Ad.astro';
       </button>
     </div>
 
+    <!-- Tarjeta principal de la calculadora (Área de captura) -->
     <div class="calculator-card">
       <!-- Selector de Tasa -->
       <div class="rate-selector-wrapper">
@@ -129,7 +130,6 @@ import Ad from '../components/Ad.astro';
 
     function parseNum(str: string): number {
       if (!str) return 0;
-      // Reemplaza los puntos de miles y cambia la coma decimal por punto para poder operar matemáticamente
       const clean = str.replace(/\./g, '').replace(',', '.');
       const val = parseFloat(clean);
       return isNaN(val) ? 0 : val;
@@ -188,10 +188,13 @@ import Ad from '../components/Ad.astro';
       }
     }
 
-    // --- MANEJO DE INPUTS (Tipo text para soportar puntos y comas visuales) ---
+    // --- MANEJO DE INPUTS (Edición limpia y formato al salir con blur) ---
     if (inputExt) {
-      inputExt.addEventListener('focus', () => inputExt.select());
-      inputExt.addEventListener('click', () => inputExt.select());
+      inputExt.addEventListener('focus', () => {
+        const rawVal = parseNum(inputExt.value);
+        inputExt.value = rawVal === 0 ? '' : rawVal.toString();
+        inputExt.select();
+      });
 
       inputExt.addEventListener('input', () => {
         if (!currentActiveRecord) return;
@@ -201,12 +204,19 @@ import Ad from '../components/Ad.astro';
           inputBs.value = formatNum(val * currentRate);
         }
       });
+
+      inputExt.addEventListener('blur', () => {
+        const val = parseNum(inputExt.value);
+        inputExt.value = formatNum(val);
+      });
     }
 
     if (inputBs) {
-      inputBs.value = "0,00";
-      inputBs.addEventListener('focus', () => inputBs.select());
-      inputBs.addEventListener('click', () => inputBs.select());
+      inputBs.addEventListener('focus', () => {
+        const rawVal = parseNum(inputBs.value);
+        inputBs.value = rawVal === 0 ? '' : rawVal.toString();
+        inputBs.select();
+      });
 
       inputBs.addEventListener('input', () => {
         if (!currentActiveRecord) return;
@@ -215,6 +225,11 @@ import Ad from '../components/Ad.astro';
         if (inputExt && currentRate > 0) {
           inputExt.value = formatNum(val / currentRate);
         }
+      });
+
+      inputBs.addEventListener('blur', () => {
+        const val = parseNum(inputBs.value);
+        inputBs.value = formatNum(val);
       });
     }
 
