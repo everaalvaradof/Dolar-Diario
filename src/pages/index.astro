@@ -120,12 +120,19 @@ import Ad from '../components/Ad.astro';
       });
     }
 
-    // --- FUNCIONES DE FORMATEO (Puntos para miles, coma para decimales) ---
-    function formatNum(num: number): string {
+    // --- FORMATEO EN VIVO TIPO BANCO ---
+    function formatInputLive(value: string): string {
+      // Limpia todo menos los números
+      let digits = value.replace(/\D/g, '');
+      if (!digits) return '0,00';
+
+      // Convierte a número flotante asumiendo que los últimos 2 dígitos son centavos
+      let numberVal = parseFloat(digits) / 100;
+
       return new Intl.NumberFormat('es-VE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(num);
+      }).format(numberVal);
     }
 
     function parseNum(str: string): number {
@@ -167,18 +174,18 @@ import Ad from '../components/Ad.astro';
       const extVal = parseNum(inputExt?.value || '1,00');
       
       if (inputBs) {
-        inputBs.value = formatNum(extVal * currentRate);
+        inputBs.value = formatInputLive((extVal * 100).toFixed(0));
       }
 
       if (brechaValue) {
         if (activeRateType === 'bcv_eur') {
           const bEur = record.brecha_usdt_eur !== undefined ? record.brecha_usdt_eur : 0;
-          brechaValue.innerText = `${formatNum(Number(bEur))}%`;
+          brechaValue.innerText = `${formatInputLive((Number(bEur) * 100).toFixed(0))}%`;
         } else if (activeRateType === 'usdt_avg') {
           brechaValue.innerText = `0,00%`;
         } else {
           const bUsd = record.brecha_usdt_usd !== undefined ? record.brecha_usdt_usd : 0;
-          brechaValue.innerText = `${formatNum(Number(bUsd))}%`;
+          brechaValue.innerText = `${formatInputLive((Number(bUsd) * 100).toFixed(0))}%`;
         }
       }
 
@@ -188,48 +195,32 @@ import Ad from '../components/Ad.astro';
       }
     }
 
-    // --- MANEJO DE INPUTS (Edición limpia y formato al salir con blur) ---
+    // --- MANEJO DE INPUTS EN TIEMPO REAL ---
     if (inputExt) {
-      inputExt.addEventListener('focus', () => {
-        const rawVal = parseNum(inputExt.value);
-        inputExt.value = rawVal === 0 ? '' : rawVal.toString();
-        inputExt.select();
-      });
-
       inputExt.addEventListener('input', () => {
+        const formatted = formatInputLive(inputExt.value);
+        inputExt.value = formatted;
+
         if (!currentActiveRecord) return;
         const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
-        const val = parseNum(inputExt.value);
+        const val = parseNum(formatted);
         if (inputBs) {
-          inputBs.value = formatNum(val * currentRate);
+          inputBs.value = formatInputLive((val * currentRate * 100).toFixed(0));
         }
-      });
-
-      inputExt.addEventListener('blur', () => {
-        const val = parseNum(inputExt.value);
-        inputExt.value = formatNum(val);
       });
     }
 
     if (inputBs) {
-      inputBs.addEventListener('focus', () => {
-        const rawVal = parseNum(inputBs.value);
-        inputBs.value = rawVal === 0 ? '' : rawVal.toString();
-        inputBs.select();
-      });
-
       inputBs.addEventListener('input', () => {
+        const formatted = formatInputLive(inputBs.value);
+        inputBs.value = formatted;
+
         if (!currentActiveRecord) return;
         const currentRate = Number(currentActiveRecord[activeRateType]) || 1;
-        const val = parseNum(inputBs.value);
+        const val = parseNum(formatted);
         if (inputExt && currentRate > 0) {
-          inputExt.value = formatNum(val / currentRate);
+          inputExt.value = formatInputLive((val / currentRate * 100).toFixed(0));
         }
-      });
-
-      inputBs.addEventListener('blur', () => {
-        const val = parseNum(inputBs.value);
-        inputBs.value = formatNum(val);
       });
     }
 
@@ -240,11 +231,7 @@ import Ad from '../components/Ad.astro';
         if (inputExt) inputExt.value = '1,00';
         if (currentActiveRecord) {
           const currentRate = Number(currentActiveRecord[activeRateType]) || 0;
-          if (inputBs) inputBs.value = formatNum(currentRate);
-        }
-        if (inputExt) {
-          inputExt.focus();
-          inputExt.select();
+          if (inputBs) inputBs.value = formatInputLive((currentRate * 100).toFixed(0));
         }
       });
     }
